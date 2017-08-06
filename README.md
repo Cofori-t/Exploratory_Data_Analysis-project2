@@ -38,6 +38,7 @@ fips
 : A five-digit number (represented as a string) indicating the U.S. county
 SCC
 : The name of the source as indicated by a digit string (see source code classification table)
+
 Pollutant
 : A string indicating the pollutant
 Emissions
@@ -99,3 +100,67 @@ plot1.png
 )
 Upload the PNG file on the Assignment submission page
 Copy and paste the R code from the corresponding R file into the text box at the appropriate point in the peer assessment.
+
+Directory was created and the files downloaded:
+getwd()
+setwd(".\\couseras")
+setwd(".\\course2")
+
+# Creating Folder and Downloading Files in the folder:
+if(!file.exists("data")) dir.create("data")
+fileurl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip?accessType=DOWNLOAD"
+download.file(fileurl, destfile = "./data/NEI_data.zip", mode="wb")
+unzip("./data/NEI_data.zip", exdir = "./data/NEI.rds")
+Q1
+The sum of the emmision was aggregated per year from 1999-2008 and barplot (Base) used to plot the graph.
+#The graph shows a decrease in Total Emmision from 1999 t0 2008
+Q2
+subset of the total emissions of PM2.5 for Baltimore City, Maryland (for fips="24510") was aggregated from 1999 to 2008.
+SubNEI=subset(NEI,fips=="24510")
+Stot.PM25yr <- aggregate(Emissions ~ year,SubNEI, sum)
+A Barplot was ploted for the analysis.
+ #Total emissions from PM2.5 shows a decreased in Baltimore City, Maryland from 1999 to 2008. 
+ Q3
+ ggplot2 plotting system was used
+ 
+ #The "point" source shows a slight increase overall emmision from 1999-2005 and a further decline till 2008. "Non-road","Road" and "non-point" show a decline between 1999 and 2002. It then remains constant till 2005 and decline again till 2008.
+
+Q4
+A subset of coal combustion source of NEI data was created.
+coal <- grepl("coal", SCC$SCC.Level.Four, ignore.case=TRUE) 
+comb <- grepl("comb", SCC$SCC.Level.One, ignore.case=TRUE)
+#combine coal/combution and prepare data for plot
+coalComb<- (comb & coal)
+combSCC <- SCC[coalComb,]$SCC
+combNEI <- NEI[NEI$SCC %in% combSCC,]
+ggplot plotting system was used.
+#Emissions from coal combustion related sources shows decreased from 1999-2008.
+
+Q5
+A subset of the motor vehicles for  SCC.Level.Two and fips=24510 was created. 
+# Subsetting vehicle (fips=24510) dataset and preparing for Plot
+veh <- grepl("vehicle", SCC$SCC.Level.Two, ignore.case=TRUE)
+vehSCC <- SCC[veh,]$SCC
+vehNEI <- NEI[NEI$SCC %in% vehSCC,]
+SubVehNEI <- vehNEI[vehNEI$fips=="24510",]
+
+ggplot2 was used to create the Graphs
+#The graph showa a decline of Emissions from motor vehicle sources  in Baltimore City 1999 to 2008  
+Q6
+Subsets for: emissions from motor vehicle sources in Baltimore City (fips == "24510") and  emissions from motor vehicle sources in Los Angeles County, California (fips == "06037") were created and combined.
+veh <- grepl("vehicle", SCC$SCC.Level.Two, ignore.case=TRUE)
+vehSCC <- SCC[veh,]$SCC
+vehNEI <- NEI[NEI$SCC %in% vehSCC,]
+
+vehBaltNEI <- vehNEI[vehNEI$fips=="24510",]
+
+#View(SubVehNEI)
+
+vehLANEI <- vehNEI[vehNEI$fips=="06037",]
+vehBaltNEI$city <- "Baltimore City"
+vehLANEI$city <- "Los Angeles County"
+
+# Combine the two subsets with city name into one data frame
+combNEI <- rbind(vehBaltNEI,vehLANEI)
+GGplot2 was used to produce the plots.
+#Los Angeles County shows a great changes (decrease) over time in motor vehicle emissions as compare to baltimore.
